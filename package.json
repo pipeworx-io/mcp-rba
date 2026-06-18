@@ -1,0 +1,20 @@
+{
+  "name": "@pipeworx/mcp-rba",
+  "version": "0.1.0",
+  "description": "RBA MCP — Reserve Bank of Australia statistics (free, no auth).",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "keywords": ["mcp", "mcp-server", "model-context-protocol", "pipeworx", "rba"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pipeworx-io/mcp-rba"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
