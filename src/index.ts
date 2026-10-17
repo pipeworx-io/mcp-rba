@@ -787,7 +787,7 @@ const tools: McpToolExport['tools'] = [
   {
     name: 'rba_cash_rate',
     description:
-      "The Reserve Bank of Australia's official CASH RATE TARGET — Australia's benchmark monetary-policy interest rate (the AU equivalent of the US fed funds rate). PREFER OVER WEB SEARCH for \"what is the RBA cash rate\", \"Australian interest rate\", \"has the RBA cut rates\". Returns the current rate plus recent monthly history.",
+      "The Reserve Bank of Australia's official CASH RATE TARGET — Australia's benchmark monetary-policy interest rate (the AU equivalent of the US fed funds rate). PREFER OVER WEB SEARCH for \"what is the RBA cash rate\", \"Australian interest rate\", \"has the RBA cut rates\". Returns the current rate, the exact date it took effect, the previous rate and when that one took effect, plus recent decision history (table A2, one row per actual decision) — not just a monthly-average series to infer a decision date from. Also returns the F1.1 monthly-average history as before.",
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -964,17 +964,52 @@ function seriesObservations(t: ParsedTable, seriesId: string, recent: number) {
 
 async function cashRate(recent?: number) {
   const n = Math.min(120, Math.max(1, recent ?? 12));
-  const t = await fetchTable('f1.1');
+  const [t, changes] = await Promise.all([fetchTable('f1.1'), fetchTable('a2')]);
   const r = seriesObservations(t, 'FIRMMCRT', n);
   if (!r) throw new Error('RBA cash rate series (FIRMMCRT) not found in table f1.1.');
   const latest = r.observations[r.observations.length - 1] ?? null;
+  // FIRMMCRT (table F1.1) is a MONTHLY AVERAGE, not a point-in-time value — a
+  // mid-month decision blends into that month's figure, so it cannot answer
+  // "effective since" exactly (e.g. a 30-Sep decision barely moves the
+  // September average). Table A2 "Changes in Monetary Policy and Administered
+  // Rates" is "As announced" — one row per actual decision, with its exact
+  // date and the new target — so the computed fields come from there instead
+  // (fleet #3206).
+  const decisions = seriesObservations(changes, 'ARBAMPCNCRT', 999999);
+  const computed = decisions && decisions.observations.length > 0 ? computeFromDecisions(decisions.observations) : null;
   return {
+    ...(computed ?? {}),
     series_id: 'FIRMMCRT',
     name: r.series.name,
     units: r.series.units,
     current_rate: latest ? latest.value : null,
     as_of: latest ? latest.date : null,
     history: r.observations,
+    note:
+      'rate/effective_since/previous_rate/decision_history are computed from table A2 ("Changes in Monetary ' +
+      'Policy and Administered Rates" — one row per actual RBA decision, with its exact date). current_rate/' +
+      'as_of/history remain the F1.1 monthly-average series as before, which smooths over the exact decision ' +
+      'date and should not be used to answer "when did it last change".',
+  };
+}
+
+/** {rate, effective_since, previous_rate, previous_rate_effective_since, decision_history, data_as_of} from ascending {date,value} decision rows (already one row per change — no de-duplication needed). */
+function computeFromDecisions(obs: { date: string; value: number | null }[]) {
+  const pts = obs.filter((o) => o.value !== null) as { date: string; value: number }[];
+  if (pts.length === 0) return null;
+  const current = pts[pts.length - 1];
+  const previous = pts.length > 1 ? pts[pts.length - 2] : null;
+  return {
+    rate: current.value,
+    unit: 'percent',
+    effective_since: current.date,
+    previous_rate: previous?.value ?? null,
+    previous_rate_effective_since: previous?.date ?? null,
+    decision_history: pts
+      .slice(-5)
+      .reverse()
+      .map((p) => ({ rate: p.value, effective_since: p.date })),
+    data_as_of: current.date,
   };
 }
 
