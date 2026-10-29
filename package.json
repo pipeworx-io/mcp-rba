@@ -1,12 +1,20 @@
 {
   "name": "@pipeworx/mcp-rba",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "RBA MCP — Reserve Bank of Australia statistics (free, no auth).",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./tools.json": "./tools.json",
+    "./package.json": "./package.json"
+  },
   "bin": {
     "mcp-rba": "bin/cli.js"
+  },
+  "files": ["bin/", "lib/", "tools.json", "server.json"],
+  "engines": {
+    "node": ">=18"
   },
   "keywords": ["mcp", "mcp-server", "model-context-protocol", "pipeworx", "rba"],
   "license": "MIT",
@@ -14,19 +22,12 @@
     "type": "git",
     "url": "git+https://github.com/pipeworx-io/mcp-rba.git"
   },
-  "scripts": {
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.30.0",
-    "tsx": "^4.19.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.3",
-    "@cloudflare/workers-types": "^4.20260405.1"
-  },
+  "mcpName": "io.github.pipeworx-io/rba",
   "pipeworx": {
-    "sourceHash": "v1-9027e1b23bb9afae10c3d5e5bb0ca300add8a80ccef5528fe6f07682ec0fa03d",
-    "sourceCommit": "f5821587e59206a76fc200d1b9cbeaad15a549ab"
+    "mode": "gateway",
+    "slug": "rba",
+    "gatewaySlug": "rba",
+    "sourceHash": "v1-88b90f5c8d7c330de52b710bf56c8c44df4dca7d6206f28cee7c0c71a5d042c5",
+    "sourceCommit": "6bae4cfa7b6a73bbe014dc8820a19c80c842b21e"
   }
 }
