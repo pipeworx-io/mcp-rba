@@ -1,6 +1,6 @@
 {
   "name": "@pipeworx/mcp-rba",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "RBA MCP — Reserve Bank of Australia statistics (free, no auth).",
   "type": "module",
   "main": "lib/index.js",
@@ -27,7 +27,7 @@
     "mode": "gateway",
     "slug": "rba",
     "gatewaySlug": "rba",
-    "sourceHash": "v1-88b90f5c8d7c330de52b710bf56c8c44df4dca7d6206f28cee7c0c71a5d042c5",
-    "sourceCommit": "6bae4cfa7b6a73bbe014dc8820a19c80c842b21e"
+    "sourceHash": "v1-dc09a2dbe6d6ba909780cdbf0dc4d8b07919a1efef512d9ff8c5a481ede06547",
+    "sourceCommit": "db27387ed3ef7ec4805d465f7964a7f65f937006"
   }
 }
